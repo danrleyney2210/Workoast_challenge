@@ -8,9 +8,10 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { VehicleList } from "@/components/search/VehicleList/VehicleList.tsx";
-import { TimeRangeFilters } from "@/components/search/TimeRangeFilters.tsx";
+
 import { useSearchPage } from "./useSearchPage.ts";
 import { AdditionalFilters } from "@/components/search/AdditionalFilters/AdditionalFilters.tsx";
+import { TimeRangeFilters } from "@/components/search/TimeRangeFilters/TimeRangeFilters.tsx";
 
 export function SearchPage() {
   const { form } = useSearchPage();
