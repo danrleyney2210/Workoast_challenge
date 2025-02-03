@@ -1,6 +1,3 @@
-import { useFormContext } from "react-hook-form";
-import { FormValues } from "./form";
-import { trpc } from "@/trpc";
 import {
   Accordion,
   AccordionContent,
@@ -21,14 +18,11 @@ import { Car, Users, DollarSign } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/classnames";
 
-export function AdditionalFilters() {
-  const form = useFormContext<FormValues>();
-  const [options] = trpc.vehicles.options.useSuspenseQuery();
+import { useAdditionalFilters } from "./useAdditionalFilters";
 
-  const price = form.watch("price");
-  const classification = form.watch("classification");
-  const make = form.watch("make");
-  const minPassengers = form.watch("minPassengers");
+export function AdditionalFilters() {
+  const { form, price, classification, make, minPassengers, options } =
+    useAdditionalFilters();
 
   return (
     <Accordion

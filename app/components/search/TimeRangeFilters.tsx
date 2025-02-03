@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select.tsx";
-import { FormValues } from "@/components/search/form.tsx";
+import { FormValues } from "@/pages/SearchPage/Schema";
 
 function getTimeOptions(startDate: Date) {
   const start = startOfDay(startDate);

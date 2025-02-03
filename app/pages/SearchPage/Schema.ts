@@ -8,6 +8,7 @@ export interface FormValues {
   make: string[];
   classification: string[];
   page: number;
+  perPage: number;
 }
 
 export const combineDateTime = (date: Date, time: string) => {

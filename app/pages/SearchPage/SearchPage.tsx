@@ -3,38 +3,17 @@ import { Button } from "@/components/ui/button.tsx";
 import { Form } from "@/components/ui/form.tsx";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { roundToNearest30Minutes } from "@/lib/times.ts";
-import { addDays, addHours, format } from "date-fns";
-import { Suspense, useState } from "react";
+
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { useForm } from "react-hook-form";
-import { FormValues } from "@/components/search/form.tsx";
-import { AdditionalFilters } from "@/components/search/AdditionalFilters.tsx";
-import { VehicleList } from "@/components/search/VehicleList.tsx";
+
+import { VehicleList } from "@/components/search/VehicleList/VehicleList.tsx";
 import { TimeRangeFilters } from "@/components/search/TimeRangeFilters.tsx";
+import { useSearchPage } from "./useSearchPage.ts";
+import { AdditionalFilters } from "@/components/search/AdditionalFilters/AdditionalFilters.tsx";
 
 export function SearchPage() {
-  const [initialStartDateAndTime] = useState(() =>
-    roundToNearest30Minutes(addHours(new Date(), 1)),
-  );
-
-  const [initialEndDateAndTime] = useState(() =>
-    addDays(initialStartDateAndTime, 1),
-  );
-
-  const form = useForm<FormValues>({
-    defaultValues: {
-      startDate: initialStartDateAndTime,
-      startTime: format(initialStartDateAndTime, "HH:mm"),
-      endDate: initialEndDateAndTime,
-      endTime: format(initialEndDateAndTime, "HH:mm"),
-      minPassengers: 1,
-      classification: [],
-      make: [],
-      price: [10, 100],
-      page: 1,
-    },
-  });
+  const { form } = useSearchPage();
 
   const filters = (
     <ErrorBoundary

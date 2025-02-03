@@ -1,8 +1,5 @@
-import { Pagination, trpc } from "@/trpc";
-import { useFormContext } from "react-hook-form";
-import { combineDateTime, FormValues } from "@/components/search/form";
 import { Button } from "@/components/ui/button";
-import { useMemo } from "react";
+
 import { Link } from "react-router-dom";
 import {
   Table,
@@ -15,136 +12,11 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Car, Users, Calendar } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-function PaginationControls({ data }: { data: Pagination }) {
-  const form = useFormContext<FormValues>();
-  const currentPage = form.watch("page");
-  const { totalPages, totalItems, itemsPerPage } = data;
-
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
-  const endItem = Math.min(currentPage * itemsPerPage, totalItems);
-
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxPagesToShow = 5;
-
-    if (totalPages <= maxPagesToShow) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      pages.push(1);
-
-      let startPage = Math.max(currentPage - 1, 2);
-      let endPage = Math.min(currentPage + 1, totalPages - 1);
-      if (currentPage <= 2) {
-        endPage = 4;
-      } else if (currentPage >= totalPages - 1) {
-        startPage = totalPages - 3;
-      }
-      if (startPage > 2) {
-        pages.push("...");
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i);
-      }
-
-      if (endPage < totalPages - 1) {
-        pages.push("...");
-      }
-
-      pages.push(totalPages);
-    }
-
-    return pages;
-  };
-
-  return (
-    <div className="mt-6 flex flex-col items-center gap-4">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => form.setValue("page", currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </Button>
-
-        <div className="flex items-center gap-1">
-          {getPageNumbers().map((page, idx) =>
-            typeof page === "number" ? (
-              <Button
-                key={idx}
-                variant={currentPage === page ? "default" : "outline"}
-                size="sm"
-                className="w-8"
-                onClick={() => form.setValue("page", page)}
-              >
-                {page}
-              </Button>
-            ) : (
-              <span key={idx} className="px-2">
-                {page}
-              </span>
-            ),
-          )}
-        </div>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => form.setValue("page", currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          Next
-        </Button>
-      </div>
-
-      <p className="text-sm text-muted-foreground">
-        Showing {startItem} to {endItem} of {totalItems} vehicles
-      </p>
-    </div>
-  );
-}
+import { useVehicleList } from "./useVehicleList";
+import { PaginationControls } from "../PaginationControls/PaginationControls";
 
 export function VehicleList() {
-  const form = useFormContext<FormValues>();
-  const startDate = form.watch("startDate");
-  const startTime = form.watch("startTime");
-  const endDate = form.watch("endDate");
-  const endTime = form.watch("endTime");
-  const minPassengers = form.watch("minPassengers");
-  const classification = form.watch("classification");
-  const make = form.watch("make");
-  const price = form.watch("price");
-  const page = form.watch("page");
-
-  const startDateTime = useMemo(
-    () => combineDateTime(startDate, startTime),
-    [startDate, startTime],
-  );
-  const endDateTime = useMemo(
-    () => combineDateTime(endDate, endTime),
-    [endDate, endTime],
-  );
-
-  const [searchResponse] = trpc.vehicles.search.useSuspenseQuery(
-    {
-      startTime: startDateTime.toISOString(),
-      endTime: endDateTime.toISOString(),
-      page: Number(page),
-      passengerCount: Number(minPassengers),
-      classification: classification,
-      make: make,
-      priceMin: price[0],
-      priceMax: price[1],
-    },
-    {
-      keepPreviousData: true,
-    },
-  );
+  const { searchResponse, startDateTime, endDateTime } = useVehicleList();
 
   if (searchResponse.vehicles.length === 0) {
     return (

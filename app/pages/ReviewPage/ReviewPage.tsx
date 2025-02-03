@@ -1,15 +1,16 @@
 import { Button } from "@/components/ui/button";
 import { formatCents } from "@/lib/formatters";
-import { trpc } from "@/trpc";
-import { format, formatDuration, intervalToDuration } from "date-fns";
-import { useLocation, useNavigate } from "react-router-dom";
+import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator.tsx";
 import { VehicleDetails } from "@/components/VehicleDetails.tsx";
-import { MiniPageLayout } from "../components/MiniPageLayout";
+import { MiniPageLayout } from "../../components/MiniPageLayout";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ErrorBoundary } from "react-error-boundary";
 import { ErrorFallback } from "@/components/ErrorFallback";
+import { useReviewPage } from "./useReviewPage";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 function Timeline({ startDate, endDate }: { startDate: Date; endDate: Date }) {
   return (
@@ -39,49 +40,16 @@ function Timeline({ startDate, endDate }: { startDate: Date; endDate: Date }) {
 }
 
 function Content() {
-  const location = useLocation();
   const navigate = useNavigate();
 
-  const searchParams = new URLSearchParams(location.search);
-  const id = searchParams.get("id");
-  const start = searchParams.get("start") ?? "";
-  const end = searchParams.get("end") ?? "";
-
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-
-  const [vehicle] = trpc.vehicles.get.useSuspenseQuery({ id: id! });
-
-  const [quote] = trpc.reservations.quote.useSuspenseQuery({
-    vehicleId: id!,
-    startTime: startDate.toISOString(),
-    endTime: endDate.toISOString(),
-  });
-
-  const createReservation = trpc.reservations.create.useMutation();
-
-  const handleConfirm = async () => {
-    try {
-      const reservation = await createReservation.mutateAsync({
-        vehicleId: id!,
-        startTime: startDate.toISOString(),
-        endTime: endDate.toISOString(),
-      });
-
-      navigate(`/confirmation/${reservation.id}`);
-    } catch (error) {
-      console.error("Reservation failed:", error);
-      // Handle error (e.g., show an error message)
-    }
-  };
-
-  const formattedDuration = formatDuration(
-    intervalToDuration({
-      start: startDate,
-      end: endDate,
-    }),
-    { delimiter: ", " },
-  );
+  const {
+    vehicle,
+    quote,
+    formattedDuration,
+    startDate,
+    endDate,
+    handleConfirm,
+  } = useReviewPage();
 
   return (
     <div className="flex flex-col gap-8">
@@ -117,9 +85,20 @@ function Content() {
           <Timeline startDate={startDate} endDate={endDate} />
         </div>
 
-        <Button size="lg" className="w-full" onClick={handleConfirm}>
-          Confirm reservation
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button size="lg" className="w-full" onClick={handleConfirm}>
+            Confirm reservation
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-2"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to search
+          </Button>
+        </div>
       </div>
     </div>
   );
